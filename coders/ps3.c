@@ -203,7 +203,7 @@ ModuleExport void UnregisterPS3Image(void)
 %
 */
 
-static void inline FilenameToTitle(const char *filename,char *title,
+static inline void FilenameToTitle(const char *filename,char *title,
   const size_t extent)
 {
   int
@@ -215,7 +215,7 @@ static void inline FilenameToTitle(const char *filename,char *title,
 
   if (extent == 0)
     return;
-  for (i=0; (filename[i] != '\0') && ((offset+1) < extent); i++)
+  for (i=0; (filename[i] != '\0') && ((offset+1) < (ssize_t) extent); i++)
   {
     unsigned char
       c = filename[i];
@@ -264,7 +264,7 @@ static void inline FilenameToTitle(const char *filename,char *title,
   /*
     If parentheses remain unbalanced, close them.
   */
-  while ((depth > 0) && ((offset+1) < extent)) {
+  while ((depth > 0) && ((offset+1) < (ssize_t) extent)) {
     title[offset++]=')';
     depth--;
   }
@@ -274,7 +274,7 @@ static void inline FilenameToTitle(const char *filename,char *title,
   */
   if (offset == 0)
     {
-      (void) strncpy(title,"Untitled",extent-1);
+      (void) CopyMagickString(title,"Untitled",extent-1);
       title[extent-1]='\0';
     }
 }

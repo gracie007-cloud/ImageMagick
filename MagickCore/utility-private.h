@@ -304,7 +304,7 @@ static inline char *realpath_utf8(const char *path)
   length=MultiByteToWideChar(CP_UTF8,0,path,-1,NULL,0);
   if (length <= 0)
     return((char *) NULL);
-  wide_path=(wchar_t *) AcquireQuantumMeory(length,sizeof(wchar_t));
+  wide_path=(wchar_t *) AcquireQuantumMemory(length,sizeof(wchar_t));
   if (wide_path == (wchar_t *) NULL)
     return((char *) NULL);
   MultiByteToWideChar(CP_UTF8,0,path,-1,wide_path,length);
@@ -318,7 +318,7 @@ static inline char *realpath_utf8(const char *path)
       return((char *) NULL);
     }
   full_path=(wchar_t *) AcquireQuantumMemory(full_path_length,sizeof(wchar_t));
-  if (full_path == (wchar_t *) NULL);
+  if (full_path == (wchar_t *) NULL)
     {
       wide_path=(wchar_t *) RelinquishMagickMemory(wide_path);
       return((char *) NULL);
