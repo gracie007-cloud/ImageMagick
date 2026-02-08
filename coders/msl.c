@@ -240,7 +240,7 @@ static int IsPathDirectory(const char *path)
   return(1);
 }
 
-static void MSLPushImage(MSLInfo *msl_info,Image *image)
+static ssize_t MSLPushImage(MSLInfo *msl_info,Image *image)
 {
   ssize_t
     n;
@@ -274,6 +274,7 @@ static void MSLPushImage(MSLInfo *msl_info,Image *image)
     ThrowFatalException(ResourceLimitFatalError,"MemoryAllocationFailed")
   if (msl_info->number_groups != 0)
     msl_info->group_info[msl_info->number_groups-1].numImages++;
+  return(n);
 }
 
 static void MSLPopImage(MSLInfo *msl_info)
@@ -356,7 +357,6 @@ static void MSLStartElement(void *context,const xmlChar *tag,
   */
   (void) LogMagickEvent(CoderEvent,GetMagickModule(),
     "  SAX.startElement(%s",tag);
-  exception=AcquireExceptionInfo();
   parser=(xmlParserCtxtPtr) context;
   msl_info=(MSLInfo *) parser->_private;
   if (msl_info->depth++ >= MagickMaxRecursionDepth)
@@ -366,6 +366,7 @@ static void MSLStartElement(void *context,const xmlChar *tag,
       xmlStopParser((xmlParserCtxtPtr) context);
       return;
     }
+  exception=AcquireExceptionInfo();
   n=msl_info->n;
   keyword=(const char *) NULL;
   value=(char *) NULL;
@@ -1634,12 +1635,12 @@ static void MSLStartElement(void *context,const xmlChar *tag,
                     for (j=0; j < msl_info->n; j++)
                     {
                       const char
-                        *prop;
+                        *property;
 
-                      prop=GetImageProperty(msl_info->attributes[j],"id",
+                      property=GetImageProperty(msl_info->attributes[j],"id",
                         exception);
-                      if ((prop != (const char *) NULL)  &&
-                          (LocaleCompare(value,value) == 0))
+                      if ((property != (const char *) NULL)  &&
+                          (LocaleCompare(property,value) == 0))
                         {
                           SetImageType(composite_image,TrueColorAlphaType,
                             exception);
@@ -3071,7 +3072,7 @@ static void MSLStartElement(void *context,const xmlChar *tag,
     {
       if (LocaleCompare((const char *) tag,"image") == 0)
         {
-          MSLPushImage(msl_info,(Image *) NULL);
+          n=MSLPushImage(msl_info,(Image *) NULL);
           if (attributes == (const xmlChar **) NULL)
             break;
           for (i=0; (attributes[i] != (const xmlChar *) NULL); i++)
@@ -7550,6 +7551,7 @@ ModuleExport size_t RegisterMSLImage(void)
   entry->decoder=(DecodeImageHandler *) ReadMSLImage;
   entry->encoder=(EncodeImageHandler *) WriteMSLImage;
 #endif
+  entry->flags^=CoderDecoderThreadSupportFlag;
   entry->format_type=ImplicitFormatType;
   (void) RegisterMagickInfo(entry);
   return(MagickImageCoderSignature);

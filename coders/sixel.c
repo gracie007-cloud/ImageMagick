@@ -214,8 +214,15 @@ static unsigned char *get_params(unsigned char *p, int *param, int *len)
       {
         for (n = 0; isdigit((int) ((unsigned char) *p)); p++)
         {
-          if (n <= (INT_MAX/10))
-            n=(int) ((ssize_t) n*10+(*p-'0'));
+          int digit = *p-'0';
+          ssize_t tmp = (ssize_t) n*10+digit;
+
+          if (tmp > INT_MAX)
+            {
+              n=INT_MAX;
+              break;
+            }
+          n=(int) tmp;
         }
         if (*len < 10)
           param[(*len)++]=n;
@@ -401,7 +408,10 @@ static MagickBooleanType sixel_decode(Image *image,unsigned char *p,
             dmsx=imsx > attributed_ph ? imsx : attributed_ph;
             dmsy=imsy > attributed_pv ? imsy : attributed_pv;
             if (SetImageExtent(image,(size_t) dmsx,(size_t) dmsy,exception) == MagickFalse)
-              break;
+              {
+                imbuf=(sixel_pixel_t *) RelinquishMagickMemory(imbuf);
+                return(MagickFalse);
+              }
             dmbuf=(sixel_pixel_t *) AcquireQuantumMemory((size_t) dmsx,(size_t)
               dmsy*sizeof(sixel_pixel_t));
             if (dmbuf == (sixel_pixel_t *) NULL)
@@ -507,7 +517,10 @@ static MagickBooleanType sixel_decode(Image *image,unsigned char *p,
             dmsx=nx;
             dmsy=ny;
             if (SetImageExtent(image,(size_t) dmsx,(size_t) dmsy,exception) == MagickFalse)
-              break;
+              {
+                imbuf=(sixel_pixel_t *) RelinquishMagickMemory(imbuf);
+                return(MagickFalse);
+              }
             dmbuf=(sixel_pixel_t *) AcquireQuantumMemory((size_t) dmsx,(size_t)
               dmsy*sizeof(sixel_pixel_t));
             if (dmbuf == (sixel_pixel_t *) NULL)
